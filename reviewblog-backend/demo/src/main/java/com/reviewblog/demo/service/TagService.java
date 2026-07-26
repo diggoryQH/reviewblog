@@ -4,6 +4,7 @@ package com.reviewblog.demo.service;
 import com.reviewblog.demo.entity.Tag;
 import com.reviewblog.demo.repository.TagRepository;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TagService {
 
     private TagRepository tagRepository;

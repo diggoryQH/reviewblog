@@ -16,6 +16,7 @@ import java.util.List;
 public class PostResponse {
     private Long id;
     private String title;
+    private String slug;
     private String content;
     private String summary;
     private String coverImageUrl;

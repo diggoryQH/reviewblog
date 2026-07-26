@@ -19,7 +19,7 @@ public class PostRequest {
     private String coverImageUrl;
 
     @NotNull
-    private ContentType contentType;
+    private ContentType type;
 
     private Long categoryId;
 
