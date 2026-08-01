@@ -23,7 +23,6 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
-    private final TagRepository tagRepository;
     private final TagService tagService;
 
     @Transactional(readOnly = true)
@@ -31,27 +30,29 @@ public class PostService {
         Page<Post> posts = (keyword != null && !keyword.isBlank())
                 ? postRepository.searchByTitle(keyword, pageable)
                 : postRepository.filterPosts(type, categoryId, pageable);
-        return  posts.map(this::toResponse);
+        return posts.map(this::toResponse);
     }
 
     @Transactional
     public PostResponse getBySlug(String slug) {
         Post post = postRepository.findBySlug(slug)
-                .orElseThrow(()-> new ResourceNotFoundException("Khong tim thay bai viet:"+ slug));
-        post.setViewCount(post.getViewCount()+1);
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết: " + slug));
+        post.setViewCount(post.getViewCount() + 1); // tăng view mỗi khi có người xem
         postRepository.save(post);
         return toResponse(post);
     }
+
     @Transactional
-    public PostResponse create(PostRequest request, String username) {
-        User author = userRepository.findByUsername(username)
-                .orElseThrow(()-> new ResourceNotFoundException("Khong tim thay nguoi dung:"+ username));
+    public PostResponse create(PostRequest request, String authorUsername) {
+        User author = userRepository.findByUsername(authorUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user: " + authorUsername));
 
         Category category = null;
-        if(request.getCategoryId() != null){
+        if (request.getCategoryId() != null) {
             category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(()-> new ResourceNotFoundException("Khong tim thay danh muc id="+request.getCategoryId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục id=" + request.getCategoryId()));
         }
+
         Post post = Post.builder()
                 .title(request.getTitle())
                 .slug(generateUniqueSlug(request.getTitle()))
@@ -65,13 +66,12 @@ public class PostService {
                 .build();
 
         return toResponse(postRepository.save(post));
-
     }
 
     @Transactional
     public PostResponse update(Long id, PostRequest request) {
         Post post = postRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Khong tim thay bai viet id="+ id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết id=" + id));
 
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
@@ -80,7 +80,7 @@ public class PostService {
         post.setType(request.getType());
         post.setTags(tagService.findOrCreateTags(request.getTagNames()));
 
-        if(request.getCategoryId() != null){
+        if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục id=" + request.getCategoryId()));
             post.setCategory(category);
@@ -91,12 +91,11 @@ public class PostService {
 
     @Transactional
     public void delete(Long id) {
-        if(!postRepository.existsById(id)){
+        if (!postRepository.existsById(id)) {
             throw new ResourceNotFoundException("Không tìm thấy bài viết id=" + id);
         }
         postRepository.deleteById(id);
     }
-
 
     private String generateUniqueSlug(String title) {
         String base = CategoryService.toSlug(title);
@@ -108,6 +107,7 @@ public class PostService {
         }
         return slug;
     }
+
     private PostResponse toResponse(Post post) {
         return PostResponse.builder()
                 .id(post.getId())

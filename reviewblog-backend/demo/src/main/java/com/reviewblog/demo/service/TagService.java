@@ -15,12 +15,14 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class TagService {
 
-    private TagRepository tagRepository;
+    private final TagRepository tagRepository;
 
     public List<Tag> getAll() {
         return tagRepository.findAll();
     }
 
+    // Nhận vào list tên tag (vd: ["Isekai", "Hành động"]),
+    // tag nào đã tồn tại thì lấy lại, chưa có thì tự tạo mới
     public Set<Tag> findOrCreateTags(List<String> names) {
         Set<Tag> tags = new HashSet<>();
         if (names == null) return tags;
